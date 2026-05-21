@@ -1,20 +1,29 @@
 # Annihilation
 
-**Annihilation** is a high-performance Linux utility for secure data destruction. It ensures physical data erasure by enforcing hardware-level synchronization, rendering recovery impossible.
+A high-performance secure shredder for Linux, leveraging low-level I/O primitives to ensure non-recoverable data destruction.
 
-## Performance
-Designed for maximum hardware throughput.
+## Architecture
+Annihilation bypasses OS-level abstractions by implementing a hardware-synchronized destruction pipeline.
 
-| Metric | Result (100 files, 1KB each) |
-| :--- | :--- |
-| **Avg Latency** | 7.9 ms per file |
-| **Throughput** | Hardware-limited (NVMe peak) |
+- **Kernel-level Sync:** Dual `fsync` invocations force IO barrier completion, preventing data leakage via volatile caches.
+- **Atomic Renaming:** Filenames are obfuscated before removal to eliminate metadata remnants in FS journals.
+- **SSD Lifecycle Management:** Post-wipe `FITRIM` via `ioctl` triggers controller-level cell deallocation, ensuring data blocks are physically zeroed by the NAND controller.
 
-## Tech Stack
-* **Language:** Rust
-* **Sync Mechanism:** Dual `fsync` call per file
-* **Optimization:** Zero-copy truncation & hardware `fstrim`
+## Performance Metrics
+| Metric | Value | Constraint |
+| :--- | :--- | :--- |
+| **IO Latency** | ~7.9 ms/file | Hardware sync overhead |
+| **Throughput** | Sequential NVMe Max | Bus speed / NAND limit |
+| **Implementation**| Zero-copy I/O | Syscall overhead |
 
-## Installation
+## Security Model
+The utility addresses the physical persistence of data on NAND media.
+1. **Zeroing:** Overwrites binary data with `0` via `io::repeat(0)`.
+2. **Barrier Compliance:** `sync_all` ensures data reaches the physical storage media.
+3. **Journal Sanitization:** `rename` and `remove` operations target filesystem journal integrity.
+
+## Deployment
+Requires superuser privileges for `ioctl` access and filesystem controller management.
+
 ```bash
-cargo build --release
+sudo ./target/release/annihilation
