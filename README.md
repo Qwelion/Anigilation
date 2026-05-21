@@ -18,7 +18,3 @@ Designed for maximum hardware throughput.
 ## Installation
 ```bash
 cargo build --release
-
-## Test
-<img width="774" height="164" alt="image" src="https://github.com/user-attachments/assets/4681642d-3671-4e7d-89a5-586611b4e0b2" />
-
