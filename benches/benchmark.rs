@@ -1,4 +1,4 @@
-// benches/benchmark.rs (AI, Gemini 3.1 pro)
+// benches/benchmark.rs
 use {
     annihilation::step_1,
     criterion::{criterion_group, criterion_main, BatchSize, Criterion},
